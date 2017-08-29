@@ -1,5 +1,0 @@
-train: 10000 samples
-test: 1000 samples
-test accuracy:  0.533
-seen total:  804  seen_right:  414  seen_acc_per:  0.514925373134
-unseen total:  196  unseen_right:  119  unseen_acc_per:  0.607142857143
