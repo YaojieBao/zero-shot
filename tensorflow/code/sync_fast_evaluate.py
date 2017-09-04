@@ -45,12 +45,12 @@ def evaluate_easy(Ypred, Ytrue):
     return [acc, acc2]
 
 ''' evaluate '''
-def run(Sig_Y, Xval, Yval, Xbase, Ybase, V, sim_scale):
+def run(Sig_Y, Xval, Yval, Xbase, Ybase, W, sim_scale):
     #Ybase = np.array([1,2,0,3,2]) # test ybase
     #Yval = np.array([1,3])
-    #Sim_base = Compute_Sim(Sig_Y, Ybase, Ybase, sim_scale)
+    Sim_base = Compute_Sim(Sig_Y, Ybase, Ybase, sim_scale)
     Sim_val = Compute_Sim(Sig_Y, Yval, Ybase, sim_scale)
-    #V = np.matmul(np.linalg.pinv(Sim_base), W)
+    V = np.matmul(np.linalg.pinv(Sim_base), W)
     Ypred_val = test_V(V, Sim_val, Xval, Yval)
     acc_val = evaluate_easy(Ypred_val, Yval)
     return acc_val

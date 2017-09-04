@@ -1,29 +1,10 @@
 import sys
 import numpy as np
-import learn
-import evaluate
-import scipy.spatial.distance as ds
-
-''' replace nan and inf to 0 '''
-def replace_nan(X):
-    X[np.isnan(X)] = 0
-    X[np.isinf(X)] = 0
-    return X
-
-''' compute class label similarity '''
-def Compute_Sim(Sig_Y, idx1, idx2, sim_scale):
-    sig_y1 = Sig_Y[np.unique(idx1-1)]
-    sig_y2 = Sig_Y[np.unique(idx2-1)]
-
-    dist = ds.cdist(sig_y1, sig_y2, 'euclidean')
-    dist = dist.astype(np.float32)
-    Sim = np.exp(-np.square(dist) * sim_scale);
-    s = np.sum(Sim, axis=1)
-    Sim = replace_nan(Sim / s[:, None])
-    return Sim
+import sync_fast_learn
+import sync_fast_evaluate
 
 def train(data, config):
-    V_record = [] # training result of W in different folds
+    W_record = [] # training result of W in different folds
     acc_record = [] # validataion accuracy
     nr_fold = config.getint('data', 'nfold')
     lamda = config.getfloat('model', 'lamda')
@@ -45,13 +26,10 @@ def train(data, config):
         Ybase = np.delete(Ytr, fold_loc[j], axis=0)
  	Xval = Xtr[fold_loc[j]];
         Yval = Ytr[fold_loc[j]];
-
-        Sim_base = Compute_Sim(Sig_Y, Ybase, Ybase, sim_scale);
-
         #print "xbase:", Xbase.shape, " xtr:", Xtr.shape, " Ybase:", Ybase.shape, " Ytr:", Ytr.shape
-        V = learn.learning(Sim_base, Xbase, Ybase, lamda)
-        acc = evaluate.run(Sig_Y, Xval, Yval, Xbase, Ybase, V, sim_scale)
-        V_record.append(V)
+        W = sync_fast_learn.learning(Xbase, Ybase, lamda)
+        acc = sync_fast_evaluate.run(Sig_Y, Xval, Yval, Xbase, Ybase, W, sim_scale)
+        W_record.append(W)
         acc_record.append(acc)
     print acc_record
 

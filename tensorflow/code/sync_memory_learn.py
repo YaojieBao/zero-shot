@@ -7,13 +7,13 @@ def generate_batch(x, idx, n, batch_size):
     batch_index = random.sample(xrange(n), batch_size)
     return x[batch_index], idx[batch_index]
 
-def learning(Sim_base, Xbase, Ybase, lamda):
+def learning(Sig_Y, Xbase, Ybase, lamda):
     print '''-----run tensorflow start-----'''
     # parameters
     #batch_size = 19443
-    learning_rate = 0.1
-    training_epochs = 500 # 150
-    display_step = 50
+    learning_rate = 0.01
+    training_epochs = 3000
+    display_step = 100
 
     # set session
     sess = tf.Session()
@@ -33,6 +33,17 @@ def learning(Sim_base, Xbase, Ybase, lamda):
     X = tf.placeholder(tf.float32, shape=[None, image_size])
     V = tf.Variable(tf.random_normal([class_num, image_size]))
 
+    # calculate sim_base
+    memory = Sig_Y[np.unique(Ybase-1)]
+    input_label = Sig_Y[np.unique(Ybase-1)]
+    memory_size, label_embedding_size = memory.shape
+    memory_embedding_size = 100
+    A = tf.Variable(tf.random_normal([label_embedding_size, memory_embedding_size]))
+    m = tf.matmul(memory, A) # memory_size, memory_embedding_size
+    u = tf.matmul(input_label, A) #input_class_size, memory_embedding_size
+    dotted = tf.matmul(m, tf.transpose(u))
+    Sim_base = tf.nn.softmax(dotted)
+
     # calculate sim base
     W = tf.matmul(Sim_base, V)
     XW = tf.matmul(X, tf.transpose(W))
@@ -45,6 +56,8 @@ def learning(Sim_base, Xbase, Ybase, lamda):
 
     # set optimizer
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
+    #optimizer = tf.train.RMSPropOptimizer(learning_rate).minimize(cost)
+    #optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=0.8).minimize(cost)
     #optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
     # init variables
@@ -63,6 +76,7 @@ def learning(Sim_base, Xbase, Ybase, lamda):
 	    print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(loss))
 
     # output W
+    A = sess.run(A)
     V_opt = sess.run(V)
     print '''-----run tensorflow end------'''
-    return V_opt
+    return V_opt, A

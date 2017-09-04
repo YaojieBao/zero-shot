@@ -44,13 +44,31 @@ def evaluate_easy(Ypred, Ytrue):
     print acc, acc2
     return [acc, acc2]
 
+def softmax(X):
+    ''' compute softmax values for each sets of numbers in X. '''
+    ''' normalize X first to avoid overflow '''
+    max_val = np.max(X)
+    s = np.sum(np.exp(X - max_val), axis = 1)
+    return np.exp(X - max_val) / s[:, None]
+
+def compute_probs(A, Sig_Y, Ybase, Yval):
+    memory = Sig_Y[np.unique(Ybase - 1)]
+    validation = Sig_Y[np.unique(Yval - 1)]
+    m = np.matmul(memory, A) # memory_size, memory_embedding_size
+    u = np.matmul(validation, A) #input_class_size, memory_embedding_size
+    dotted = np.matmul(u, np.transpose(m))
+    Sim_val = softmax(dotted)
+    return Sim_val
+
 ''' evaluate '''
-def run(Sig_Y, Xval, Yval, Xbase, Ybase, V, sim_scale):
+def run(Sig_Y, Xval, Yval, Xbase, Ybase, A, V, sim_scale):
     #Ybase = np.array([1,2,0,3,2]) # test ybase
     #Yval = np.array([1,3])
     #Sim_base = Compute_Sim(Sig_Y, Ybase, Ybase, sim_scale)
-    Sim_val = Compute_Sim(Sig_Y, Yval, Ybase, sim_scale)
+    #Sim_val = Compute_Sim(Sig_Y, Yval, Ybase, sim_scale)
     #V = np.matmul(np.linalg.pinv(Sim_base), W)
+
+    Sim_val = compute_probs(A, Sig_Y, Ybase, Yval)
     Ypred_val = test_V(V, Sim_val, Xval, Yval)
     acc_val = evaluate_easy(Ypred_val, Yval)
     return acc_val

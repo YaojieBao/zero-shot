@@ -17,7 +17,7 @@ config.set('data', 'norm_method', 'L2')
 
 
 config.add_section('model')
-config.set('model', 'method', 'sync')
+config.set('model', 'method', 'sync_memory')
 config.set('model', 'lamda', '2.4414e-04')
 config.set('model', 'sim_scale', '1')
 

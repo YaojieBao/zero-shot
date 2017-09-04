@@ -1,7 +1,7 @@
 import sys
 import numpy as np
-import learn
-import evaluate
+import sync_memory_learn
+import sync_memory_evaluate
 import scipy.spatial.distance as ds
 
 ''' replace nan and inf to 0 '''
@@ -46,11 +46,11 @@ def train(data, config):
  	Xval = Xtr[fold_loc[j]];
         Yval = Ytr[fold_loc[j]];
 
-        Sim_base = Compute_Sim(Sig_Y, Ybase, Ybase, sim_scale);
+        #Sim_base = Compute_Sim(Sig_Y, Ybase, Ybase, sim_scale);
 
         #print "xbase:", Xbase.shape, " xtr:", Xtr.shape, " Ybase:", Ybase.shape, " Ytr:", Ytr.shape
-        V = learn.learning(Sim_base, Xbase, Ybase, lamda)
-        acc = evaluate.run(Sig_Y, Xval, Yval, Xbase, Ybase, V, sim_scale)
+        V, A = sync_memory_learn.learning(Sig_Y, Xbase, Ybase, lamda)
+        acc = sync_memory_evaluate.run(Sig_Y, Xval, Yval, Xbase, Ybase, A, V, sim_scale)
         V_record.append(V)
         acc_record.append(acc)
     print acc_record

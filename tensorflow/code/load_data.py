@@ -3,7 +3,7 @@ import numpy as np
 import ConfigParser
 import scipy.spatial.distance as ds
 
-np.seterr(divide='ignore', invalid='ignore')
+#np.seterr(divide='ignore', invalid='ignore')
 
 # one hot embedding
 # example: 3 ==> [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
@@ -82,7 +82,7 @@ def load_AWA(config):
         arr = line.strip().split('   ')
         tmp = [float(x) for x in arr]
         label_embedding.append(tmp)
-    label_embedding = np.array(label_embedding)
+    label_embedding = np.array(label_embedding, dtype='float32')
     label_embedding[label_embedding == -1] = 0
 
     # pack data
@@ -120,7 +120,7 @@ def run(dataset, method, config):
     if (dataset == 'AWA'):
 	data = load_AWA(config)
 
-    if (method == 'sync'):
+    if (method == 'sync') or (method ==  'sync_fast') or (method == 'sync_memory'):
         # compute distance for Scr
         Sig_Y = get_class_signatures(data['label_embedding'], config.get('data','norm_method'));
         Sig_dist = Sig_dist_comp(Sig_Y);
