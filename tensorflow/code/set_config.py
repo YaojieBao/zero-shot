@@ -18,7 +18,7 @@ config.set('data', 'norm_method', 'L2')
 
 config.add_section('model')
 config.set('model', 'method', 'sync_memory')
-config.set('model', 'lamda', '2.4414e-04')
+config.set('model', 'lamda', '0.0005')
 config.set('model', 'sim_scale', '1')
 
 # Writing our configuration file to 'example.cfg'

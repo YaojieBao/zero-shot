@@ -23,7 +23,6 @@ def Compute_Sim(Sig_Y, idx1, idx2, sim_scale):
     return Sim
 
 def train(data, config):
-    V_record = [] # training result of W in different folds
     acc_record = [] # validataion accuracy
     nr_fold = config.getint('data', 'nfold')
     lamda = config.getfloat('model', 'lamda')
@@ -34,7 +33,7 @@ def train(data, config):
     Sig_Y = data['Sig_Y']
 
     # test fold
-    # fold_loc = [[0,1],[1,4],[2,4],[1,3],[0,5]]
+    #fold_loc = [[0,1],[1,4],[2,4],[1,3],[0,5]]
 
     #print "before: Xtr", Xtr.shape
     for j in range(nr_fold):
@@ -46,20 +45,21 @@ def train(data, config):
  	Xval = Xtr[fold_loc[j]];
         Yval = Ytr[fold_loc[j]];
 
-        #Sim_base = Compute_Sim(Sig_Y, Ybase, Ybase, sim_scale);
+        #Ybase = np.array([1,2,0,3,2]) # test ybase
+        Sim_base = Compute_Sim(Sig_Y, Ybase, Ybase, sim_scale);
+        Sim_val = Compute_Sim(Sig_Y, Ybase, Yval, sim_scale);
 
         #print "xbase:", Xbase.shape, " xtr:", Xtr.shape, " Ybase:", Ybase.shape, " Ytr:", Ytr.shape
-        V, A = sync_memory_learn.learning(Sig_Y, Xbase, Ybase, lamda)
-        acc = sync_memory_evaluate.run(Sig_Y, Xval, Yval, Xbase, Ybase, A, V, sim_scale)
-        V_record.append(V)
-        acc_record.append(acc)
-    print acc_record
-
-    # average accuracy
-    acc = 0.0
-    acc2 = 0.0
-    for accs in acc_record:
-        acc = acc + accs[0]
-        acc2 = acc2 + accs[1]
-    print acc / nr_fold, acc2 / nr_fold
-
+        sync_memory_learn.learning(Sig_Y, Xbase, Ybase, lamda, Sim_base, Xval, Yval, Sim_val)
+        #acc = sync_memory_evaluate.run(Sig_Y, Xval, Yval, Xbase, Ybase, sim_scale, U, m, BM_1, A_1)
+        #acc_record.append(acc)
+#    print acc_record
+#
+#    # average accuracy
+#    acc = 0.0
+#    acc2 = 0.0
+#    for accs in acc_record:
+#        acc = acc + accs[0]
+#        acc2 = acc2 + accs[1]
+#    print acc / nr_fold, acc2 / nr_fold
+#
